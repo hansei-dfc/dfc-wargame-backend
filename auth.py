@@ -3,6 +3,10 @@ import bcrypt
 from flask import request
 from flask_restx import Resource, Api, Namespace, fields
 
+from auth.db.email_verify import send_verify_email
+from auth.db.users import create_user, is_user_exists_email
+from regex import verify_email, verify_password
+
 users = {}
 
 Auth = Namespace(
@@ -32,17 +36,29 @@ class AuthRegister(Resource):
         name = request.json['name']
         email = request.json['email']
         password = request.json['password']
-        if name in users:
+
+        if (len(name) < 2 or not verify_email(email) or not verify_password(password)):
             return {
-                "message": "Register Failed"
+                "message": "Wrong email or password or name"
+            }, 500
+        elif name in users or is_user_exists_email(email):
+            return {
+                "message": "name or email already exists"
             }, 500
         else:
-            users[name] = bcrypt.hashpw(password.encode(
-                "utf-8"), bcrypt.gensalt())  # 비밀번호 저장
-            return {
-                # str으로 반환하여 return
-                'Authorization': jwt.encode({'name': name}, "secret", algorithm="HS256").decode('utf8')
-            }, 200
+            id = create_user(name, email, password)
+            if (send_verify_email(id, email)):
+                users[name] = bcrypt.hashpw(password.encode(
+                    "utf-8"), bcrypt.gensalt())  # 비밀번호 저장
+                return {
+                    # str으로 반환하여 return
+                    "message": "Success",
+                    'Authorization': jwt.encode({'name': name}, "secret", algorithm="HS256").decode('utf8')
+                }, 200
+            else:
+                return {
+                    "message": "Email sending failed"
+                }, 500
 
 
 @Auth.route('/login')
