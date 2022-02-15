@@ -1,3 +1,4 @@
+from calendar import c
 import os
 import smtplib
 from email.mime.text import MIMEText
@@ -17,6 +18,10 @@ def make_connection():
 
 # smtp 연결하고 보냄 ㅇㅇ
 def send_email(mime, to):
-    smtp = make_connection()
-    smtp.sendmail(smtp_server, to, mime.as_string()) 
-    smtp.quit()
+    try:
+        smtp = make_connection()
+        smtp.sendmail(smtp_server, to, mime.as_string()) 
+        smtp.quit()
+        return True
+    except:
+        return False

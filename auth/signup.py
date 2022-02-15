@@ -1,7 +1,8 @@
 import os
 from flask import Blueprint, request
 from api import make_packet
-from db import db
+from auth.db.email_verify import send_verify_email
+from auth.db.users import create_user, is_user_exists_email
 from regex import verify_email, verify_password
 
 signup = Blueprint('signup', __name__)
@@ -20,11 +21,11 @@ def on_signup():
     if (len(name) < 2 or not verify_email(email) or not verify_password(password)):
         return make_packet(400, "올바른 이멜 또는 비번 또는 이름 아님 ㅅㄱ")
 
-    conn = db()
-    if(conn.cursor().execute("select exists(select 1 from `users` where email=@E)", email) != -1):
-        conn.close()
-        return make_packet(400, "중복임 ㄲㅈ")
+    if (is_user_exists_email(email)): 
+        return make_packet(400, "이미 있음 ㅅㄱ")
 
-    conn.cursor()
-
-    return make_packet()
+    id = create_user(name, email, password)
+    if (send_verify_email(id, email)):
+        return make_packet(200, "이멜 인증 ㄱ")
+    else:
+        return make_packet(400, "이메일 못보냈음 ㅇㅇ")
