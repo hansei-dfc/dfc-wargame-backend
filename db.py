@@ -1,12 +1,10 @@
 import pymysql
-import hashlib
+import bcrypt
 import os
 from email.mime.text import MIMEText
 from math import fabs
 from multiprocessing import context
-import os
 import uuid
-from db import db
 from smtp import send_email
 
 email_vefify_title = os.environ.get('email_vefify_title')
@@ -40,8 +38,7 @@ def is_user_exists_email(email):
 
 
 def create_user(name, email, password):
-    password = hashlib.sha256(
-        (password + os.environ.get('pass_salt')).encode()).hexdigest()
+    password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
     conn = db()
     cus = conn.cursor()
     if (cus.execute(f"insert into `users` (`name`, `email`, `password`) values (%s, %s, %s)",
@@ -96,5 +93,5 @@ def send_verify_email(userId, email):
 
 def create_email_content(vefId):
     msg = MIMEText(f"인증 ㄱ {server_url}/{vefId}")
-    msg['Subject'] = email_vefify_title
+    msg['Subject'] = "회원가입 인증"
     return msg
