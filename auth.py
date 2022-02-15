@@ -5,7 +5,14 @@ from flask_restx import Resource, Api, Namespace, fields
 
 from email_verify import send_verify_email
 from users import create_user, is_user_exists_email
-from regex import verify_email, verify_password
+
+import re
+
+# Email regex
+email_regex = re.compile(
+    "^([\w\.\_\-])*[a-zA-Z0-9]+([\w\.\_\-])*([a-zA-Z0-9])+([\w\.\_\-])+@([a-zA-Z0-9]+\.)+[a-zA-Z0-9]{2,8}$")
+# 비밀번호 8자 하나의 문자 하나의 숫자
+password_regex = re.compile("^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$")
 
 users = {}
 
@@ -37,7 +44,7 @@ class AuthRegister(Resource):
         email = request.json['email']
         password = request.json['password']
 
-        if (len(name) < 2 or not verify_email(email) or not verify_password(password)):
+        if (len(name) < 2 or not email_regex.match(email) or not password_regex.match(password)):
             return {
                 "message": "Wrong email or password or name"
             }, 500
