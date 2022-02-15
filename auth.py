@@ -3,9 +3,7 @@ import bcrypt
 from flask import request
 from flask_restx import Resource, Api, Namespace, fields
 
-from email_verify import send_verify_email
-from users import create_user, is_user_exists_email
-
+from db import send_verify_email, create_user, is_user_exists_email
 import re
 
 # Email regex
