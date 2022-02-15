@@ -1,0 +1,30 @@
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET NAMES utf8 */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+CREATE DATABASE IF NOT EXISTS `war-game` /*!40100 DEFAULT CHARACTER SET armscii8 COLLATE armscii8_bin */;
+USE `war-game`;
+
+CREATE TABLE IF NOT EXISTS `email_verify` (
+  `userId` bigint(20) unsigned NOT NULL COMMENT '유저 id',
+  `verifyCode` char(32) COLLATE armscii8_bin NOT NULL DEFAULT replace(uuid(),'-','') COMMENT '인증 코드',
+  `expiredAt` datetime NOT NULL DEFAULT addtime(current_timestamp(),'3:00:00') COMMENT '만료일',
+  PRIMARY KEY (`verifyCode`)
+) ENGINE=InnoDB DEFAULT CHARSET=armscii8 COLLATE=armscii8_bin COMMENT='이메일 인증';
+
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '고유 id',
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '이메일',
+  `password` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '비번',
+  `createAt` datetime NOT NULL DEFAULT current_timestamp(),
+  `emailVerify` tinyint(1) unsigned NOT NULL DEFAULT 0 COMMENT '대충 true면 인증된거',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=armscii8 COLLATE=armscii8_bin;
+
+/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
+/*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40111 SET SQL_NOTES=IFNULL(@OLD_SQL_NOTES, 1) */;
