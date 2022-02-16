@@ -1,28 +1,17 @@
 from typing import Tuple
 import pymysql
 import bcrypt
-import os
-from email.mime.text import MIMEText
 import uuid
-
-from smtp import send_email
-
-email_vefify_title = os.environ.get('email_vefify_title')
-server_url = os.environ.get('server_url')
-
-db_host = os.environ.get('db_host')
-db_user = os.environ.get('db_user')
-db_password = os.environ.get('db_password')
-db_db = os.environ.get('db_db_name')
-db_charset = 'utf8'
+import env
 
 def db():
     return pymysql.connect(
-        host = db_host,
-        user = db_user,
-        password = db_password,
-        db = db_db,
-        charset = db_charset
+        host = env.db_host,
+        port = env.db_port,
+        user = env.db_user,
+        password = env.db_password,
+        db = env.db_db,
+        charset = env.db_charset
     )
 
 
@@ -34,9 +23,8 @@ def get_user_table(is_temp_user: bool) -> str:
     '''
     return "temp_users" if is_temp_user else "users"
 
-
-def is_user_exists(id_or_email: int | str, is_email: bool, is_temp_user: bool) -> bool | None:
-    '''id로 사용자가 있는지 확인합니다.
+def is_user_exists(id_or_email: int | str, is_email: bool, is_temp_user: bool) -> bool or None:
+    '''사용자가 있는지 확인합니다.
 
     Args:
         id_or_email: id(int) 또는 email(str)
@@ -73,13 +61,13 @@ def is_verified(id_or_email: int | str, is_email: bool) -> bool | None:
     if (cus.execute(f"select exists(select 1 from `{get_user_table(True)}` where `{col}`=%s)", 
         (id_or_email)) != 1): return None
 
-    if (cus.fetchone()[0] == 1): return False
+    is_temp = cus.fetchone()[0] == 1
 
     if (cus.execute(f"select exists(select 1 from `{get_user_table(False)}` where `{col}`=%s)", 
         (id_or_email)) != 1): return None
 
     conn.close()
-    return cus.fetchone()[0] == 1
+    return False if is_temp else (True if cus.fetchone()[0] == 1 else None)
 
 
 def create_user(name: str, email: str, password: str, is_temp_user: bool) -> Tuple[int, str or None] or None:
@@ -155,6 +143,22 @@ def get_user(id: int, is_temp_user: bool):
     return res
 
 
+def get_user_id(email: str, is_temp_user: bool) -> int:
+    '''이메일로 id를 가져옵니다.
+
+    Returns:
+        None: sql오류
+    '''
+    table = get_user_table(is_temp_user)
+    conn = db()
+    cus = conn.cursor()
+    if (cus.execute(f"select `id` from {table} where `email`=%s",
+        (email)) != 1): return None
+    res = cus.fetchone()[0]
+    conn.close()
+    return res
+
+
 def refresh_verify_code(id: int) -> str | None:
     '''임시 유저의 인증코드를 새로 만들고 반환합니다.
     '''
@@ -202,19 +206,6 @@ def check_password(id_or_email: int or str, is_email: bool, password: str) -> bo
     conn.close()
     return bcrypt.checkpw(password.encode('utf-8'), db_pw)
 
-def send_verify_email(id: int, email: str) -> bool | None:
-    '''인증코드를 생성 및 발신합니다.
-
-    Returns:
-        None: sql 오류
-        True: 발송됨
-        False: 발송 실패
-    '''
-    vef_id = refresh_verify_code(id)
-    if (vef_id == None): return None
-    content = create_email_content(vef_id)
-    return send_email(content, email)
-
 
 def transform_verified_user(id: int) -> int | None:
     '''임시 유저를 인증된 유저로 상태를 전환합니다.
@@ -233,10 +224,3 @@ def transform_verified_user(id: int) -> int | None:
     id = create_user_binary(name, email, password, False)
     if (id == None): return None
     return id[0]
-
-
-def create_email_content(vefId: str) -> MIMEText:
-    msg = MIMEText(f"인증 ㄱ {server_url}/{vefId}")
-    msg['Subject'] = "회원가입 인증"
-    return msg
-
