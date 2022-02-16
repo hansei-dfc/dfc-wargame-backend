@@ -6,6 +6,12 @@ import env
 
 def db():
     return pymysql.connect(
+        host='localhost',
+        port=3306,
+        user='root',
+        password='abcdefu',
+        db='war-game',
+        charset='utf8'
         host = env.db_host,
         port = env.db_port,
         user = env.db_user,

@@ -25,6 +25,7 @@ user_fields_auth = Auth.model('User login', {  # Model 객체 생성
     'password': fields.String(description='Password', required=True, example="Password1")
 })
 
+
 user_fields_register = Auth.inherit('User register', user_fields_auth, {
     'name': fields.String(description='user name', required=True, example="wa sans"),
     'redirect_url': fields.String(description='email verify redirect url', required=False, example="http://localhost/")
@@ -35,13 +36,14 @@ jwt_fields = Auth.model('JWT', {
 })
 
 
-@Auth.route('/register')
+@ Auth.route('/register')
 class AuthRegister(Resource):
     @Auth.expect(user_fields_register)
     @Auth.doc(responses={200: 'Success'})
     @Auth.doc(responses={400: 'Bad request'})
     @Auth.doc(responses={403: 'Email already exists'})
     @Auth.doc(responses={500: 'Register Failed'})
+  
     def post(self):
         try:
             name = request.json['name']
@@ -85,13 +87,14 @@ class AuthRegister(Resource):
             }, 500
 
 
-@Auth.route('/login')
+@ Auth.route('/login')
 class AuthLogin(Resource):
     @Auth.expect(user_fields_auth)
     @Auth.doc(responses={200: 'Success'})
     @Auth.doc(responses={400: 'Bad request'})
     @Auth.doc(responses={403: 'Email not verified'})
     @Auth.doc(responses={404: 'Auth Failed'})
+  
     def post(self):
         try:
             email = request.json['email']
@@ -155,11 +158,12 @@ class EmailVerify(Resource):
         return redirect(urljoin(redirect_url, "?status=success"))
 
 
-@Auth.route('/get')
+@ Auth.route('/get')
 class AuthGet(Resource):
     @Auth.doc(responses={200: 'Success'})
     @Auth.doc(responses={404: 'Bad request or Invalid token'})
-    @Auth.doc(responses={403: 'Token Expired'})
+    @Auth.doc(responses={403: 'Token Expired'}
+              
     def get(self):
         try:
             header = request.headers.get('Authorization', None)
