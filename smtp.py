@@ -2,6 +2,7 @@ import smtplib
 from email.mime.text import MIMEText
 import env
 
+
 def make_connection():
     '''smtp 연결을 만들고 로그인합니다.
     '''

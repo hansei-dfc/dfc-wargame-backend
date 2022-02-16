@@ -4,20 +4,15 @@ import bcrypt
 import uuid
 import env
 
+
 def db():
     return pymysql.connect(
-        host='localhost',
-        port=3306,
-        user='root',
-        password='abcdefu',
-        db='war-game',
-        charset='utf8'
-        host = env.db_host,
-        port = env.db_port,
-        user = env.db_user,
-        password = env.db_password,
-        db = env.db_db,
-        charset = env.db_charset
+        host=env.db_host,
+        port=env.db_port,
+        user=env.db_user,
+        password=env.db_password,
+        db=env.db_db,
+        charset=env.db_charset
     )
 
 
@@ -28,6 +23,7 @@ def get_user_table(is_temp_user: bool) -> str:
         is_temp_user: True면 임시 유저 테이블을 반환합니다.
     '''
     return "temp_users" if is_temp_user else "users"
+
 
 def is_user_exists(id_or_email: int | str, is_email: bool, is_temp_user: bool) -> bool or None:
     '''사용자가 있는지 확인합니다.
@@ -46,8 +42,9 @@ def is_user_exists(id_or_email: int | str, is_email: bool, is_temp_user: bool) -
     col = "email" if is_email else "id"
     conn = db()
     cus = conn.cursor()
-    if (cus.execute(f"select exists(select 1 from {table} where `{col}`=%s)", 
-        (id_or_email)) != 1): return None
+    if (cus.execute(f"select exists(select 1 from {table} where `{col}`=%s)",
+                    (id_or_email)) != 1):
+        return None
     conn.close()
     return cus.fetchone()[0] == 1
 
@@ -64,13 +61,15 @@ def is_verified(id_or_email: int | str, is_email: bool) -> bool | None:
     conn = db()
     cus = conn.cursor()
     # 으악 더~러워
-    if (cus.execute(f"select exists(select 1 from `{get_user_table(True)}` where `{col}`=%s)", 
-        (id_or_email)) != 1): return None
+    if (cus.execute(f"select exists(select 1 from `{get_user_table(True)}` where `{col}`=%s)",
+                    (id_or_email)) != 1):
+        return None
 
     is_temp = cus.fetchone()[0] == 1
 
-    if (cus.execute(f"select exists(select 1 from `{get_user_table(False)}` where `{col}`=%s)", 
-        (id_or_email)) != 1): return None
+    if (cus.execute(f"select exists(select 1 from `{get_user_table(False)}` where `{col}`=%s)",
+                    (id_or_email)) != 1):
+        return None
 
     conn.close()
     return False if is_temp else (True if cus.fetchone()[0] == 1 else None)
@@ -105,7 +104,8 @@ def create_user_binary(name: str, email: str, password: bytes, is_temp_user: boo
     table = get_user_table(is_temp_user)
     verify_code = uuid.uuid1().hex if is_temp_user else None
     sql = ", `verify_code`) values (%s, %s, %s, %s)" if is_temp_user else ") values (%s, %s, %s)"
-    sql_data = (name, email, password, verify_code) if is_temp_user else (name, email, password)
+    sql_data = (name, email, password, verify_code) if is_temp_user else (
+        name, email, password)
 
     conn = db()
     cus = conn.cursor()
@@ -130,7 +130,8 @@ def delete_user(id: int, is_temp_user: bool) -> bool:
     conn = db()
     cus = conn.cursor()
     if (cus.execute(f"delete from `{table}` where `id`=%s",
-        (id)) != 1): return False
+                    (id)) != 1):
+        return False
     conn.commit()
     conn.close()
     return True
@@ -143,7 +144,8 @@ def get_user(id: int, is_temp_user: bool):
     conn = db()
     cus = conn.cursor()
     if (cus.execute(f"select * from {table} where `id`=%s",
-        (id)) != 1): return None
+                    (id)) != 1):
+        return None
     res = cus.fetchone()
     conn.close()
     return res
@@ -159,7 +161,8 @@ def get_user_id(email: str, is_temp_user: bool) -> int:
     conn = db()
     cus = conn.cursor()
     if (cus.execute(f"select `id` from {table} where `email`=%s",
-        (email)) != 1): return None
+                    (email)) != 1):
+        return None
     res = cus.fetchone()[0]
     conn.close()
     return res
@@ -172,7 +175,7 @@ def refresh_verify_code(id: int) -> str | None:
     conn = db()
     cus = conn.cursor()
     if (cus.execute(f"update `temp_users` set `verify_code`=%s where `id`=%s",
-        (vid, id)) != 1):
+                    (vid, id)) != 1):
         return None
     conn.commit()
     conn.close()
@@ -185,7 +188,8 @@ def check_verify_code(id: int, verify_code: str) -> bool | None:
     conn = db()
     cus = conn.cursor()
     if(cus.execute("select exists(select 1 from `temp_users` where `id`=%s and `verify_code`=%s)",
-        (id, verify_code)) != 1): return None
+                   (id, verify_code)) != 1):
+        return None
     conn.close()
     return cus.fetchone()[0] == 1
 
@@ -193,7 +197,7 @@ def check_verify_code(id: int, verify_code: str) -> bool | None:
 def check_password(id_or_email: int or str, is_email: bool, password: str) -> bool or None:
     '''비밀번호가 일치한지 확인합니다.
     인증된 유저만
-    
+
     Args:
         id_or_email: 이메일 혹은 id
         is_email: 이메일 여부
@@ -207,7 +211,8 @@ def check_password(id_or_email: int or str, is_email: bool, password: str) -> bo
     col = "email" if is_email else "id"
     conn = db()
     cus = conn.cursor()
-    if(cus.execute(f"select `password` from `users` where `{col}`=%s", (id_or_email)) != 1): return None
+    if(cus.execute(f"select `password` from `users` where `{col}`=%s", (id_or_email)) != 1):
+        return None
     db_pw = cus.fetchone()[0]
     conn.close()
     return bcrypt.checkpw(password.encode('utf-8'), db_pw)
@@ -221,12 +226,14 @@ def transform_verified_user(id: int) -> int | None:
         int: 사용자 id
     '''
     user_data = get_user(id, True)
-    if (user_data == None or not delete_user(id, True)): return None
+    if (user_data == None or not delete_user(id, True)):
+        return None
 
     email = user_data[1]
     name = user_data[2]
     password = user_data[3]
 
     id = create_user_binary(name, email, password, False)
-    if (id == None): return None
+    if (id == None):
+        return None
     return id[0]

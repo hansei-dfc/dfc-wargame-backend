@@ -43,7 +43,6 @@ class AuthRegister(Resource):
     @Auth.doc(responses={400: 'Bad request'})
     @Auth.doc(responses={403: 'Email already exists'})
     @Auth.doc(responses={500: 'Register Failed'})
-  
     def post(self):
         try:
             name = request.json['name']
@@ -60,7 +59,7 @@ class AuthRegister(Resource):
             return {
                 "message": "Wrong email or password or name"
             }, 400
-        
+
         # 유저가 이미 있는지
         if is_verified(email, True) != None:
             return {
@@ -68,10 +67,10 @@ class AuthRegister(Resource):
                 "message": "email already exists"
             }, 403
 
-        #임시 유저 추가
+        # 임시 유저 추가
         temp_id, verify_code = create_user(name, email, password, True)
         # 처리 오류
-        if temp_id == None: 
+        if temp_id == None:
             return {
                 "message": "Internal error"
             }, 500
@@ -94,31 +93,31 @@ class AuthLogin(Resource):
     @Auth.doc(responses={400: 'Bad request'})
     @Auth.doc(responses={403: 'Email not verified'})
     @Auth.doc(responses={404: 'Auth Failed'})
-  
     def post(self):
         try:
             email = request.json['email']
             password = request.json['password']
         except:
-            return { "message": "Bad request" }, 400
+            return {"message": "Bad request"}, 400
 
         # 올바른 이메일인지
         if not email_regex.match(email):
-            return { "message": "Auth failed" }, 404
+            return {"message": "Auth failed"}, 404
 
         # 이메일 인증됬는지
         if is_verified(email, True) == False:
-            return { "message": "Email not verified" }, 403
+            return {"message": "Email not verified"}, 403
 
         # 비밀번호 일치 확인
         if check_password(email, True, password) != True:
-            return { "message": "Auth failed" }, 404
-        
+            return {"message": "Auth failed"}, 404
+
         # 유저 id 가져옴, sql 처리속도 높이기 위함.
         user_id = get_user_id(email, False)
 
         # 킹론상 가능함
-        if user_id == None: return { "message": "Internal error" }, 500
+        if user_id == None:
+            return {"message": "Internal error"}, 500
 
         return {
             "message": "Success",
@@ -137,7 +136,9 @@ class EmailVerify(Resource):
     def get(self):
         v_code = parse_verify_data(request.args.get("vc"))
         redirect_url = request.args.get("r", "")
-        if not redirect_url or redirect_url.isspace(): redirect_url = env.default_email_verify_redirect_url
+        if not redirect_url or redirect_url.isspace(
+        ):
+            redirect_url = env.default_email_verify_redirect_url
 
         # 인증코드가 없어!
         if v_code == None:
@@ -162,8 +163,7 @@ class EmailVerify(Resource):
 class AuthGet(Resource):
     @Auth.doc(responses={200: 'Success'})
     @Auth.doc(responses={404: 'Bad request or Invalid token'})
-    @Auth.doc(responses={403: 'Token Expired'}
-              
+    @Auth.doc(responses={403: 'Token Expired'})
     def get(self):
         try:
             header = request.headers.get('Authorization', None)

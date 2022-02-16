@@ -19,7 +19,7 @@ services:
     image: mysql:5.7
     volumes:
       - todo-mysql-data:/var/lib/mysql
-    environment: 
+    environment:
       MYSQL_ROOT_PASSWORD: abcdefu
       MYSQL_DATABASE: war-game
 

@@ -1,9 +1,9 @@
+from auth import Auth
+from flask_restx import Resource, Api
+from flask import Flask, jsonify
 from dotenv import load_dotenv
 load_dotenv()
 
-from flask import Flask, jsonify
-from flask_restx import Resource, Api
-from auth import Auth
 
 app = Flask(__name__)
 api = Api(
@@ -17,6 +17,7 @@ api = Api(
 )
 
 api.add_namespace(Auth, '/auth')
+
 
 @app.route('/')
 def home():

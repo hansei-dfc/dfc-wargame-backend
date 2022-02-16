@@ -6,6 +6,7 @@ from db import refresh_verify_code
 from smtp import send_email
 import env
 
+
 def make_verify_data(user_id: int, verify_code: str) -> str:
     '''인증 데이터를 만듭니다.
     '''
@@ -17,7 +18,8 @@ def parse_verify_data(verify_data: str) -> Tuple[int, str] or None:
     '''
     try:
         vi = verify_data.find('_')
-        if (vi < 1): return None
+        if (vi < 1):
+            return None
         return (int(verify_data[0:vi], 16), verify_data[vi+1:])
     except:
         return None
@@ -30,10 +32,10 @@ def make_verify_url(user_id: int, verify_code: str, redirect_url: str) -> str:
         'vc': make_verify_data(user_id, verify_code),
         'r': redirect_url
     })
-    
+
     return urljoin(env.server_url, f"/auth/email_verify?{query}")
 
-    
+
 def send_verify_email(id: int, email: str, verify_code: str or None, redirect_url: str = "") -> bool | None:
     '''인증코드를 발신합니다.
 
@@ -45,9 +47,11 @@ def send_verify_email(id: int, email: str, verify_code: str or None, redirect_ur
         True: 발송됨
         False: 발송 실패
     '''
-    #인증코드 생성
-    if verify_code == None: verify_code = refresh_verify_code(id)
-    if (verify_code == None): return None
+    # 인증코드 생성
+    if verify_code == None:
+        verify_code = refresh_verify_code(id)
+    if (verify_code == None):
+        return None
     # 메일 내용 생성
     content = create_email_content(id, verify_code, redirect_url)
     # 메일 전송
