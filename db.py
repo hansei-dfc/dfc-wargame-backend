@@ -13,7 +13,8 @@ server_url = os.environ.get('server_url')
 
 def db():
     return pymysql.connect(
-        host='127.0.0.1',
+        host='localhost',
+        port=3306,
         user='root',
         password='abcdefu',
         db='war-game',

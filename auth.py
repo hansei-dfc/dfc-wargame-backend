@@ -23,8 +23,12 @@ user_fields = Auth.model('User', {  # Model 객체 생성
     'name': fields.String(description='a User Name', required=True, example="minpeter")
 })
 
-user_fields_auth = Auth.inherit('User Auth', user_fields, {
-    'password': fields.String(description='Password', required=True, example="password")
+email_fields = Auth.model('Email', {
+    'email': fields.String(description='a Email', required=True, example="example@gmail.com")
+})
+
+user_fields_auth = Auth.inherit('User Auth', user_fields, email_fields, {
+    'password': fields.String(description='Password', required=True, example="password1234")
 })
 
 jwt_fields = Auth.model('JWT', {
@@ -32,11 +36,11 @@ jwt_fields = Auth.model('JWT', {
 })
 
 
-@Auth.route('/register')
+@ Auth.route('/register')
 class AuthRegister(Resource):
-    @Auth.expect(user_fields_auth)
-    @Auth.doc(responses={200: 'Success'})
-    @Auth.doc(responses={500: 'Register Failed'})
+    @ Auth.expect(user_fields_auth)
+    @ Auth.doc(responses={200: 'Success'})
+    @ Auth.doc(responses={500: 'Register Failed'})
     def post(self):
         name = request.json['name']
         email = request.json['email']
@@ -66,12 +70,12 @@ class AuthRegister(Resource):
                 }, 500
 
 
-@Auth.route('/login')
+@ Auth.route('/login')
 class AuthLogin(Resource):
-    @Auth.expect(user_fields_auth)
-    @Auth.doc(responses={200: 'Success'})
-    @Auth.doc(responses={404: 'User Not Found'})
-    @Auth.doc(responses={500: 'Auth Failed'})
+    @ Auth.expect(user_fields_auth)
+    @ Auth.doc(responses={200: 'Success'})
+    @ Auth.doc(responses={404: 'User Not Found'})
+    @ Auth.doc(responses={500: 'Auth Failed'})
     def post(self):
         name = request.json['name']
         password = request.json['password']
@@ -91,10 +95,10 @@ class AuthLogin(Resource):
             }, 200
 
 
-@Auth.route('/get')
+@ Auth.route('/get')
 class AuthGet(Resource):
-    @Auth.doc(responses={200: 'Success'})
-    @Auth.doc(responses={404: 'Login Failed'})
+    @ Auth.doc(responses={200: 'Success'})
+    @ Auth.doc(responses={404: 'Login Failed'})
     def get(self):
         header = request.headers.get('Authorization')  # Authorization 헤더로 담음
         if header == None:
