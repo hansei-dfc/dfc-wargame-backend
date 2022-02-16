@@ -26,7 +26,8 @@ user_fields_auth = Auth.model('User login', {  # Model 객체 생성
 })
 
 user_fields_register = Auth.inherit('User register', user_fields_auth, {
-    'name': fields.String(description='user name', required=True, example="wa sans")
+    'name': fields.String(description='user name', required=True, example="wa sans"),
+    'redirect_url': fields.String(description='email verify redirect url', required=False, example="http://localhost/")
 })
 
 jwt_fields = Auth.model('JWT', {
@@ -46,6 +47,7 @@ class AuthRegister(Resource):
             name = request.json['name']
             email = request.json['email']
             password = request.json['password']
+            redirect_url = request.json.get('redirect_url', '')
         except:
             return {
                 "message": "Bad request"
@@ -73,7 +75,7 @@ class AuthRegister(Resource):
             }, 500
 
         # 인증 메일 발송
-        if send_verify_email(temp_id, email, verify_code):
+        if send_verify_email(temp_id, email, verify_code, redirect_url):
             return {
                 "message": "Success"
             }, 200
