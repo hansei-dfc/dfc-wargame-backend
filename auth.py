@@ -3,7 +3,7 @@ import bcrypt
 from flask import request
 from flask_restx import Resource, Api, Namespace, fields
 
-from db import send_verify_email, create_user, is_user_exists_email
+from db import is_user_exists, is_verified, send_verify_email, create_user
 import re
 
 # Email regex
@@ -46,7 +46,7 @@ class AuthRegister(Resource):
             return {
                 "message": "Wrong email or password or name"
             }, 500
-        elif name in users or is_user_exists_email(email):
+        elif name in users or is_verified(email, True) != None:
             return {
                 "message": "name or email already exists"
             }, 500

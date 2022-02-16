@@ -8,21 +8,25 @@
 CREATE DATABASE IF NOT EXISTS `war-game` /*!40100 DEFAULT CHARACTER SET armscii8 COLLATE armscii8_bin */;
 USE `war-game`;
 
-CREATE TABLE IF NOT EXISTS `email_verify` (
-  `userId` bigint(20) unsigned NOT NULL COMMENT '유저 id',
-  `verifyCode` char(32) COLLATE armscii8_bin NOT NULL DEFAULT replace(uuid(),'-','') COMMENT '인증 코드',
-  `expiredAt` datetime NOT NULL DEFAULT addtime(current_timestamp(),'3:00:00') COMMENT '만료일',
-  PRIMARY KEY (`verifyCode`)
-) ENGINE=InnoDB DEFAULT CHARSET=armscii8 COLLATE=armscii8_bin COMMENT='이메일 인증';
+CREATE TABLE IF NOT EXISTS `temp_users` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '고유 id',
+  `email` varchar(320) COLLATE utf8mb4_bin NOT NULL COMMENT '이메일 최대값',
+  `name` varchar(255) COLLATE utf8mb4_bin NOT NULL COMMENT '이름',
+  `password` binary(60) NOT NULL COMMENT '비밀번호',
+  `verify_code` varchar(32) COLLATE utf8mb4_bin NOT NULL COMMENT '인증코드',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=83 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 CREATE TABLE IF NOT EXISTS `users` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '고유 id',
-  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '이메일',
-  `password` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '비번',
-  `createAt` datetime NOT NULL DEFAULT current_timestamp(),
-  `emailVerify` tinyint(1) unsigned NOT NULL DEFAULT 0 COMMENT '대충 true면 인증된거',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=armscii8 COLLATE=armscii8_bin;
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '고유id',
+  `email` varchar(320) COLLATE utf8mb4_bin NOT NULL COMMENT '메일 최대값',
+  `name` varchar(255) COLLATE utf8mb4_bin NOT NULL COMMENT '이름',
+  `password` binary(60) NOT NULL COMMENT '비밀번호',
+  `create_at` datetime NOT NULL DEFAULT current_timestamp() COMMENT '생성 날짜',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `name` (`name`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='인증된 사용자\r\n';
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
