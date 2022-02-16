@@ -25,6 +25,7 @@ def db():
         charset = db_charset
     )
 
+
 def get_user_table(is_temp_user: bool) -> str:
     '''테이블 이름을 가져옵니다
 
@@ -56,6 +57,7 @@ def is_user_exists(id_or_email: int | str, is_email: bool, is_temp_user: bool) -
     conn.close()
     return cus.fetchone()[0] == 1
 
+
 def is_verified(id_or_email: int | str, is_email: bool) -> bool | None:
     '''사용자가 이메일 인증이 되었는지 여부를 반환합니다.
 
@@ -79,6 +81,7 @@ def is_verified(id_or_email: int | str, is_email: bool) -> bool | None:
     conn.close()
     return cus.fetchone()[0] == 1
 
+
 def create_user(name: str, email: str, password: str, is_temp_user: bool) -> Tuple[int, str or None] or None:
     '''사용자를 만듭니다.
 
@@ -92,6 +95,7 @@ def create_user(name: str, email: str, password: str, is_temp_user: bool) -> Tup
     '''
     password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
     return create_user_binary(name, email, password, is_temp_user)
+
 
 def create_user_binary(name: str, email: str, password: bytes, is_temp_user: bool) -> Tuple[int, str or None] or None:
     '''사용자를 만듭니다.
@@ -119,6 +123,7 @@ def create_user_binary(name: str, email: str, password: bytes, is_temp_user: boo
     cus.execute(f"select `id` from `{table}` where email=%s", (email))
     conn.close()
     return (cus.fetchone()[0], verify_code)
+
 
 def delete_user(id: int, is_temp_user: bool) -> bool:
     '''사용자 계정을 제거합니다.
@@ -174,6 +179,28 @@ def check_verify_code(id: int, verify_code: str) -> bool | None:
     conn.close()
     return cus.fetchone()[0] == 1
 
+
+def check_password(id_or_email: int or str, is_email: bool, password: str) -> bool or None:
+    '''비밀번호가 일치한지 확인합니다.
+    인증된 유저만
+    
+    Args:
+        id_or_email: 이메일 혹은 id
+        is_email: 이메일 여부
+        password: 평문
+
+    Returns:
+        None: sql오류 또는 유저 없음
+        True: 일치
+        False: 불일치
+    '''
+    col = "email" if is_email else "id"
+    conn = db()
+    cus = conn.cursor()
+    if(cus.execute(f"select `password` from `users` where `{col}`=%s", (id_or_email)) != 1): return None
+    db_pw = cus.fetchone()[0]
+    conn.close()
+    return bcrypt.checkpw(password.encode('utf-8'), db_pw)
 
 def send_verify_email(id: int, email: str) -> bool | None:
     '''인증코드를 생성 및 발신합니다.
