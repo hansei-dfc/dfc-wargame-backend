@@ -55,7 +55,8 @@ class AuthRegister(Resource):
             }, 400
 
         # 이메일, 비밀번호 테스트
-        if (len(name) < 2 or not email_regex.match(email) or not password_regex.match(password)):
+        name_len = len(name)
+        if (name_len < 2 or name_len > 50 or not email_regex.match(email) or not password_regex.match(password)):
             return {
                 "message": "Wrong email or password or name"
             }, 400

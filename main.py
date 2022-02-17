@@ -1,11 +1,16 @@
-from auth import Auth
-from flask_restx import Resource, Api
-from flask import Flask, jsonify
 from dotenv import load_dotenv
 load_dotenv()
 
+from auth import Auth
+from flask_restx import Api
+from flask import Flask, jsonify
+from flask_cors import CORS
+
 
 app = Flask(__name__)
+
+CORS(app, resources={r'*': {'origins': '*'}})
+
 api = Api(
     app,
     version='0.1',
