@@ -1,2 +1,8 @@
 __pycache__
+
+## dot env setup ##
 .env
+
+
+## venv setup ##
+.venv
