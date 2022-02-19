@@ -15,7 +15,7 @@ api = Api(
     app,
     version='0.1',
     title="hansei ctf",
-    description="hansei ctf",
+    description="hansei ctf's backend api server",
     terms_url="/",
     contact="kali2005611@gmail.com",
     license="MIT"

@@ -20,3 +20,20 @@ db_charset=utf8
 jwt_secret=[string]
 jwt_exp_period=[seconds]
 ```
+
+
+## Necessary Python Packages
+```
+bcrypt
+Flask
+Flask-Cors
+flask-restx
+PyJWT
+PyMySQL
+python-dotenv
+```
+
+### installation
+```
+pip install -r requirements.txt
+```
