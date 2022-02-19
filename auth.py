@@ -127,9 +127,8 @@ class AuthLogin(Resource):
                 'email': email,
                 'exp': datetime.utcnow() + env.jwt_exp_period
             }, env.jwt_secret, algorithm="HS256")
-        }, 200
-
-
+        }, 200  
+        
 @Auth.route('/email_verify')
 class EmailVerify(Resource):
     @Auth.doc(responses={301: 'Bad request or Invalid code'})

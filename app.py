@@ -14,8 +14,8 @@ CORS(app, resources={r'*': {'origins': '*'}})
 api = Api(
     app,
     version='0.1',
-    title="Minpeter's API Server",
-    description="Minpeter's sandbox API Server!",
+    title="hansei ctf",
+    description="hansei ctf",
     terms_url="/",
     contact="kali2005611@gmail.com",
     license="MIT"

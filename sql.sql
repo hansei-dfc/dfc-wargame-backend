@@ -28,6 +28,20 @@ CREATE TABLE IF NOT EXISTS `users` (
   UNIQUE KEY `name` (`name`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='인증된 사용자\r\n';
 
+CREATE TABLE IF NOT EXISTS 'notices' (
+  'notice_id' bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'notice id',
+  'author_id' bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'author id',
+  'notice_title' varchar(255) COLLATE utf8mb4_bin NOT NULL COMMENT 'notice 타이틀',
+  'notice_type' ENUM('title', 'topbar', 'message', 'none'),
+  'notice_contents' varchar(655351) COLLATE utf8mb4_bin NOT NULL COMMENT 'notice 컨텐츠'
+)
+
+CREATE TABLE IF NOT EXISTS 'notice_views' (
+  'notice_id' bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'notice id',
+  'user_id' bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'user id',
+  'read_at' datetime,
+  'never_show' tinyint(1) unsigned NOT NULL COMMENT '보여짐의 유무'
+)
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
