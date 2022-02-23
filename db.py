@@ -25,7 +25,7 @@ def get_user_table(is_temp_user: bool) -> str:
     return "temp_users" if is_temp_user else "users"
 
 
-def is_user_exists(id_or_email: int | str, is_email: bool, is_temp_user: bool) -> bool or None:
+def is_user_exists(id_or_email: int or str, is_email: bool, is_temp_user: bool) -> bool or None:
     '''사용자가 있는지 확인합니다.
 
     Args:
@@ -49,7 +49,7 @@ def is_user_exists(id_or_email: int | str, is_email: bool, is_temp_user: bool) -
     return cus.fetchone()[0] == 1
 
 
-def is_verified(id_or_email: int | str, is_email: bool) -> bool | None:
+def is_verified(id_or_email: int or str, is_email: bool) -> bool or None:
     '''사용자가 이메일 인증이 되었는지 여부를 반환합니다.
 
     Returns:
@@ -137,14 +137,14 @@ def delete_user(id: int, is_temp_user: bool) -> bool:
     return True
 
 
-def get_user(id: int, is_temp_user: bool):
+def get_user(id_or_email: int or str, is_email: bool, is_temp_user: bool):
     '''사용자 튜플을 가져옵니다.
     '''
     table = get_user_table(is_temp_user)
     conn = db()
     cus = conn.cursor()
-    if (cus.execute(f"select * from {table} where `id`=%s",
-                    (id)) != 1):
+    if (cus.execute(f"select * from {table} where `{'email' if is_email else 'id'}`=%s",
+                    (id_or_email)) != 1):
         return None
     res = cus.fetchone()
     conn.close()
@@ -168,7 +168,7 @@ def get_user_id(email: str, is_temp_user: bool) -> int:
     return res
 
 
-def refresh_verify_code(id: int) -> str | None:
+def refresh_verify_code(id: int) -> str or None:
     '''임시 유저의 인증코드를 새로 만들고 반환합니다.
     '''
     vid = uuid.uuid1().hex
@@ -182,13 +182,39 @@ def refresh_verify_code(id: int) -> str | None:
     return vid
 
 
-def check_verify_code(id: int, verify_code: str) -> bool | None:
+def refresh_id(id: int) -> bytes or None:
+    '''유저의 재발급 토큰을 재설정합니다.
+    '''
+    vid = uuid.uuid1().bytes
+    conn = db()
+    cus = conn.cursor()
+    if (cus.execute(f"update `users` set `refresh_id`=%s where `id`=%s",
+                    (vid, id)) != 1):
+        return None
+    conn.commit()
+    conn.close()
+    return vid
+
+
+def check_verify_code(id: int, verify_code: str) -> bool or None:
     '''사용자의 인증코드가 일치한지 확인합니다.
     '''
     conn = db()
     cus = conn.cursor()
     if(cus.execute("select exists(select 1 from `temp_users` where `id`=%s and `verify_code`=%s)",
                    (id, verify_code)) != 1):
+        return None
+    conn.close()
+    return cus.fetchone()[0] == 1
+
+
+def check_refresh_id(id: int, ref_id: str) -> bool or None:
+    '''사용자의 재발급 id가 일치한지 확인합니다.
+    '''
+    conn = db()
+    cus = conn.cursor()
+    if(cus.execute("select exists(select 1 from `users` where `id`=%s and `refresh_id`=%s)",
+                   (id, ref_id)) != 1):
         return None
     conn.close()
     return cus.fetchone()[0] == 1
@@ -218,7 +244,7 @@ def check_password(id_or_email: int or str, is_email: bool, password: str) -> bo
     return bcrypt.checkpw(password.encode('utf-8'), db_pw)
 
 
-def transform_verified_user(id: int) -> int | None:
+def transform_verified_user(id: int) -> int or None:
     '''임시 유저를 인증된 유저로 상태를 전환합니다.
 
     Returns:

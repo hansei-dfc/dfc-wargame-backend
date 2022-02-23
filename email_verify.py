@@ -36,7 +36,7 @@ def make_verify_url(user_id: int, verify_code: str, redirect_url: str) -> str:
     return urljoin(env.server_url, f"/auth/email_verify?{query}")
 
 
-def send_verify_email(id: int, email: str, verify_code: str or None, redirect_url: str = "") -> bool | None:
+def send_verify_email(id: int, email: str, verify_code: str or None, redirect_url: str = "") -> bool or None:
     '''인증코드를 발신합니다.
 
     Args:
