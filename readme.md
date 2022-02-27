@@ -21,19 +21,15 @@ jwt_secret=[string]
 jwt_exp_period=[seconds]
 ```
 
+## Necessary Go Packages
 
-## Necessary Python Packages
 ```
-bcrypt
-Flask
-Flask-Cors
-flask-restx
-PyJWT
-PyMySQL
-python-dotenv
+"github.com/labstack/echo"
+
 ```
 
 ### installation
+
 ```
-pip install -r requirements.txt
+go mod tidy
 ```
