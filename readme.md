@@ -24,7 +24,7 @@ jwt_exp_period=[seconds]
 ## Necessary Go Packages
 
 ```
-"github.com/labstack/echo"
+"github.com/labstack/echo/v4"
 
 ```
 
