@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"hansei-ctf-backend/db"
+	"hansei-ctf-backend/helper"
+	"hansei-ctf-backend/models"
+
 	"net/http"
-	"test-jwt/db"
-	"test-jwt/helper"
-	"test-jwt/models"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -17,6 +19,7 @@ func SignUp(c echo.Context) error {
 			"message": "bad request",
 		})
 	}
+
 	db := db.Connect()
 	result := db.Find(&user, "email=?", user.Email)
 
@@ -47,4 +50,60 @@ func SignUp(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{
 		"message": "Success",
 	})
+}
+
+func SignIn(c echo.Context) error {
+	user := new(models.User)
+
+	if err := c.Bind(user); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "bad request",
+		})
+	}
+	inputpw := user.Password
+
+	db := db.Connect()
+	result := db.Find(user, "email=?", user.Email)
+
+	// 존재하지않는 아이디일 경우
+	if result.RowsAffected == 0 {
+		return echo.ErrBadRequest
+	}
+
+	res := helper.CheckPasswordHash(user.Password, inputpw)
+
+	// 비밀번호 검증에 실패한 경우
+	if !res {
+		return echo.ErrUnauthorized
+	}
+	// 토큰 발행
+	accessToken, err := helper.CreateJWT(user.Email)
+	if err != nil {
+		return echo.ErrInternalServerError
+	}
+
+	cookie := new(http.Cookie)
+	cookie.Name = "access-token"
+	cookie.Value = accessToken
+	cookie.HttpOnly = true
+	cookie.Expires = time.Now().Add(time.Hour * 24)
+
+	c.SetCookie(cookie)
+
+	return c.JSON(http.StatusOK, map[string]string{
+		"message": "Login Success",
+	})
+}
+
+// 테스트용 API
+func MockData() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// Mock Data를 생성한다.
+		list := map[string]string{
+			"1": "고양이",
+			"2": "사자",
+			"3": "호랑이",
+		}
+		return c.JSON(http.StatusOK, list)
+	}
 }

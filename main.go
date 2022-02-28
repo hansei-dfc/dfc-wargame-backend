@@ -2,10 +2,13 @@ package main
 
 import (
 	"log"
-	"test-jwt/handler"
+	"os"
+
+	"hansei-ctf-backend/handler"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	md "github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
@@ -20,6 +23,21 @@ func main() {
 
 	// 회원가입 API
 	e.POST("/api/signup", handler.SignUp)
+
+	// 로그인 API
+	e.POST("/api/signin", handler.SignIn)
+
+	// 회원 정보 업데이트 API
+
+	// 회원 탈퇴 API
+
+	// 목데이터로 테스트
+	e.GET("/api/getlist", handler.MockData(), md.JWTWithConfig(md.JWTConfig{
+		SigningKey:  []byte(os.Getenv("SECRET_KEY")),
+		TokenLookup: "cookie:access-token",
+	}))
+
+	e.GET("/test", handler.Test)
 
 	e.Logger.Fatal(e.Start(":1323"))
 }
