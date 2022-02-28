@@ -1,24 +1,13 @@
-## .env **needs** to be created
+## .env for database
 
 ```
-smtp_user=
-smtp_sender=
-smtp_pass=
-smtp_server=[ex) smtp.gmail.com]
-smtp_port=[ex) 587]
+DBHOST=localhost
+DBUSER=postgres
+DBPASS=root
+DBNAME=test
+DBPORT=5432
 
-server_url=[backend server_ip or domain]
-default_email_verify_redirect_url=[front email verify redirect url]
-
-db_host=[db host]
-db_port=3306
-db_user=[ex) root]
-db_password=
-db_db_name=
-db_charset=utf8
-
-jwt_secret=[string]
-jwt_exp_period=[seconds]
+SECRET_KEY=ciiwqfoxmezx
 ```
 
 ## Necessary Go Packages
@@ -26,11 +15,9 @@ jwt_exp_period=[seconds]
 ```
 "github.com/labstack/echo/v4"
 "github.com/labstack/echo/v4/middleware"
-
-```
-
-### installation
-
-```
-go mod tidy
+"gorm.io/driver/postgres"
+"gorm.io/gorm"
+"github.com/golang-jwt/jwt"
+"golang.org/x/crypto/bcrypt"
+"github.com/joho/godotenv"
 ```
